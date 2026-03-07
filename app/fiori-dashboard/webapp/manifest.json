@@ -1,0 +1,111 @@
+{
+    "_version": "1.59.0",
+    "sap.app": {
+        "id": "auditaxis.fioridashboard",
+        "type": "application",
+        "title": "AuditAxis – Audit Trail Dashboard",
+        "description": "Fiori Elements List Report and Object Page for audit trail records",
+        "applicationVersion": { "version": "1.0.0" },
+        "dataSources": {
+            "mainService": {
+                "uri": "/api/audit/",
+                "type": "OData",
+                "settings": {
+                    "odataVersion": "4.0"
+                }
+            }
+        },
+        "crossNavigation": {
+            "inbounds": {
+                "AuditLog-display": {
+                    "semanticObject": "AuditLog",
+                    "action": "display",
+                    "signature": {
+                        "parameters": {},
+                        "additionalParameters": "allowed"
+                    }
+                }
+            }
+        }
+    },
+    "sap.ui5": {
+        "dependencies": {
+            "minUI5Version": "1.120.0",
+            "libs": {
+                "sap.fe.templates": {}
+            }
+        },
+        "models": {
+            "": {
+                "dataSource": "mainService",
+                "preload": true,
+                "settings": {
+                    "operationMode": "Server",
+                    "autoExpandSelect": true,
+                    "earlyRequests": true
+                }
+            }
+        },
+        "routing": {
+            "routes": [
+                {
+                    "pattern": ":?query:",
+                    "name": "AuditLogsList",
+                    "target": "AuditLogsList"
+                },
+                {
+                    "pattern": "AuditLogs({key}):?query:",
+                    "name": "AuditLogsDetail",
+                    "target": "AuditLogsDetail"
+                }
+            ],
+            "targets": {
+                "AuditLogsList": {
+                    "type": "Component",
+                    "id": "AuditLogsList",
+                    "name": "sap.fe.templates.ListReport",
+                    "options": {
+                        "settings": {
+                            "contextPath": "/AuditLogs",
+                            "variantManagement": "Page",
+                            "navigation": {
+                                "AuditLogs": {
+                                    "detail": {
+                                        "route": "AuditLogsDetail"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "AuditLogsDetail": {
+                    "type": "Component",
+                    "id": "AuditLogsDetail",
+                    "name": "sap.fe.templates.ObjectPage",
+                    "options": {
+                        "settings": {
+                            "contextPath": "/AuditLogs",
+                            "editableHeaderContent": false
+                        }
+                    }
+                }
+            }
+        },
+        "contentDensities": {
+            "compact": true,
+            "cozy": true
+        }
+    },
+    "sap.ui": {
+        "technology": "UI5",
+        "deviceTypes": {
+            "desktop": true,
+            "tablet": true,
+            "phone": true
+        }
+    },
+    "sap.fiori": {
+        "registrationIds": [],
+        "archeType": "transactional"
+    }
+}

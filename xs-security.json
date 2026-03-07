@@ -1,0 +1,76 @@
+{
+    "xsappname": "auditaxis",
+    "tenant-mode": "dedicated",
+    "description": "AuditAxis – Compliance and Audit Trail Engine",
+    "scopes": [
+        {
+            "name": "$XSAPPNAME.AuditAxis.Admin",
+            "description": "Full administrative access to AuditAxis"
+        },
+        {
+            "name": "$XSAPPNAME.AuditAxis.Auditor",
+            "description": "Read-only access for auditors – can query logs, verify chains, generate reports"
+        },
+        {
+            "name": "$XSAPPNAME.AuditAxis.System",
+            "description": "System-to-system scope for event ingestion"
+        }
+    ],
+    "attributes": [],
+    "role-templates": [
+        {
+            "name": "AuditAxisAdmin",
+            "description": "Administrator",
+            "scope-references": [
+                "$XSAPPNAME.AuditAxis.Admin",
+                "$XSAPPNAME.AuditAxis.Auditor"
+            ],
+            "attribute-references": []
+        },
+        {
+            "name": "AuditAxisAuditor",
+            "description": "Auditor (read-only)",
+            "scope-references": [
+                "$XSAPPNAME.AuditAxis.Auditor"
+            ],
+            "attribute-references": []
+        },
+        {
+            "name": "AuditAxisSystem",
+            "description": "Technical system user for event ingestion",
+            "scope-references": [
+                "$XSAPPNAME.AuditAxis.System"
+            ],
+            "attribute-references": []
+        }
+    ],
+    "role-collections": [
+        {
+            "name": "AuditAxis Administrator",
+            "description": "Full admin access",
+            "role-template-references": [
+                "$XSAPPNAME.AuditAxisAdmin"
+            ]
+        },
+        {
+            "name": "AuditAxis Auditor",
+            "description": "Read-only auditor access",
+            "role-template-references": [
+                "$XSAPPNAME.AuditAxisAuditor"
+            ]
+        },
+        {
+            "name": "AuditAxis System",
+            "description": "System integration scope",
+            "role-template-references": [
+                "$XSAPPNAME.AuditAxisSystem"
+            ]
+        }
+    ],
+    "oauth2-configuration": {
+        "redirect-uris": [
+            "https://*.cfapps.*.hana.ondemand.com/**"
+        ],
+        "token-validity": 900
+    }
+}

@@ -1,0 +1,62 @@
+{
+  "name": "auditaxis",
+  "version": "1.0.0",
+  "description": "AuditAxis – Compliance and Audit Trail Engine for SAP S/4HANA",
+  "repository": "",
+  "license": "UNLICENSED",
+  "private": true,
+  "dependencies": {
+    "@sap/cds": "^7",
+    "@sap/xssec": "^3",
+    "express": "^4",
+    "passport": "^0.7",
+    "hdb": "^0.19",
+    "@sap/xb-msg-amqp-v100": "^0.9",
+    "csv-stringify": "^6",
+    "exceljs": "^4",
+    "p-queue": "^8",
+    "node-cron": "^3"
+  },
+  "devDependencies": {
+    "@sap/cds-dk": "^7",
+    "@sap/ux-specification": "latest",
+    "rimraf": "^5",
+    "jest": "^29"
+  },
+  "scripts": {
+    "start": "cds-serve",
+    "build": "cds build --production",
+    "watch": "cds watch",
+    "clean": "rimraf gen",
+    "test": "jest --coverage --forceExit"
+  },
+  "cds": {
+    "requires": {
+      "db": {
+        "kind": "hana-cloud",
+        "impl": "@sap/cds/libx/_runtime/hana/Service.js"
+      },
+      "auth": {
+        "kind": "xsuaa"
+      },
+      "messaging": {
+        "kind": "enterprise-messaging",
+        "[development]": {
+          "kind": "file-based-messaging"
+        }
+      }
+    },
+    "hana": {
+      "deploy-format": "hdbtable"
+    },
+    "odata": {
+      "version": "v4"
+    }
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "sapux": [
+    "app/fiori-dashboard"
+  ]
+}

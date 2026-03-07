@@ -1,0 +1,7 @@
+{
+  "name": "auditaxis-fiori-dashboard",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Fiori Elements dashboard for AuditAxis",
+  "sapux": true
+}

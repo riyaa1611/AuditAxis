@@ -1,0 +1,48 @@
+{
+  "build": {
+    "target": ".",
+    "tasks": [
+      {
+        "for": "hana",
+        "src": "db",
+        "options": {
+          "model": ["db", "srv"]
+        }
+      },
+      {
+        "for": "node-cf",
+        "src": "srv",
+        "options": {
+          "model": ["db", "srv"]
+        }
+      }
+    ]
+  },
+  "[development]": {
+    "requires": {
+      "db": {
+        "kind": "sqlite",
+        "credentials": {
+          "database": ":memory:"
+        }
+      },
+      "auth": {
+        "kind": "mocked",
+        "users": {
+          "admin": {
+            "password": "admin",
+            "roles": ["AuditAxis.Admin"]
+          },
+          "auditor": {
+            "password": "auditor",
+            "roles": ["AuditAxis.Auditor"]
+          },
+          "system": {
+            "password": "system",
+            "roles": ["AuditAxis.System"]
+          }
+        }
+      }
+    }
+  }
+}

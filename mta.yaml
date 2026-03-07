@@ -1,0 +1,136 @@
+_schema-version: "3.1"
+ID: auditaxis
+version: 1.0.0
+description: "AuditAxis – Compliance and Audit Trail Engine for SAP S/4HANA"
+
+parameters:
+  enable-parallel-deployments: true
+
+build-parameters:
+  before-all:
+    - builder: custom
+      commands:
+        - npm ci
+        - npx cds build --production
+
+modules:
+  # ────────────────────────────────────────────
+  #  CAP Service Module (Node.js)
+  # ────────────────────────────────────────────
+  - name: auditaxis-srv
+    type: nodejs
+    path: gen/srv
+    parameters:
+      buildpack: nodejs_buildpack
+      memory: 512M
+      disk-quota: 1024M
+    properties:
+      SAP_JWT_TRUST_ACL: '[{"clientid":"*","identityzone":"*"}]'
+    requires:
+      - name: auditaxis-db
+      - name: auditaxis-auth
+      - name: auditaxis-messaging
+    provides:
+      - name: srv-api
+        properties:
+          srv-url: ${default-url}
+
+  # ────────────────────────────────────────────
+  #  HANA HDI Deployer
+  # ────────────────────────────────────────────
+  - name: auditaxis-db-deployer
+    type: hdb
+    path: gen/db
+    parameters:
+      buildpack: nodejs_buildpack
+      memory: 256M
+    requires:
+      - name: auditaxis-db
+
+  # ────────────────────────────────────────────
+  #  Fiori Elements UI (HTML5 App)
+  # ────────────────────────────────────────────
+  - name: auditaxis-app
+    type: html5
+    path: app/fiori-dashboard
+    build-parameters:
+      build-result: dist
+      builder: custom
+      commands:
+        - echo "No custom build step needed"
+      supported-platforms: []
+    requires:
+      - name: auditaxis-auth
+
+  # ────────────────────────────────────────────
+  #  App Router (Managed)
+  # ────────────────────────────────────────────
+  - name: auditaxis-approuter
+    type: approuter.nodejs
+    path: app/
+    parameters:
+      memory: 256M
+      disk-quota: 512M
+    properties:
+      TENANT_HOST_PATTERN: "^(.*)-${default-uri}"
+    requires:
+      - name: auditaxis-auth
+      - name: srv-api
+        group: destinations
+        properties:
+          name: srv-api
+          url: ~{srv-url}
+          forwardAuthToken: true
+      - name: auditaxis-html5-repo-runtime
+
+resources:
+  # ────────────────────────────────────────────
+  #  SAP HANA Cloud HDI Container
+  # ────────────────────────────────────────────
+  - name: auditaxis-db
+    type: com.sap.xs.hdi-container
+    parameters:
+      service: hana
+      service-plan: hdi-shared
+
+  # ────────────────────────────────────────────
+  #  XSUAA Service
+  # ────────────────────────────────────────────
+  - name: auditaxis-auth
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: xsuaa
+      service-plan: application
+      path: ./xs-security.json
+
+  # ────────────────────────────────────────────
+  #  SAP Event Mesh
+  # ────────────────────────────────────────────
+  - name: auditaxis-messaging
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: enterprise-messaging
+      service-plan: default
+      config:
+        emname: auditaxis-em
+        version: "1.1.0"
+        namespace: "auditaxis"
+        options:
+          management: true
+          messagingrest: true
+        rules:
+          topicRules:
+            publishFilter:
+              - "${namespace}/+"
+            subscribeFilter:
+              - "${namespace}/+"
+              - "sap/s4/beh/+/v1/changed"
+
+  # ────────────────────────────────────────────
+  #  HTML5 Application Repository Runtime
+  # ────────────────────────────────────────────
+  - name: auditaxis-html5-repo-runtime
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: html5-apps-repo
+      service-plan: app-runtime

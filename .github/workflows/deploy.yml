@@ -1,0 +1,88 @@
+name: AuditAxis CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  NODE_VERSION: '18'
+
+jobs:
+  test:
+    name: Lint & Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests
+        run: npm test
+
+  build:
+    name: CDS Build
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: CDS build (production)
+        run: npx cds build --production
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mta-build
+          path: gen/
+          retention-days: 7
+
+  deploy:
+    name: Deploy to SAP BTP
+    needs: build
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: mta-build
+          path: gen/
+
+      - name: Setup Cloud Foundry CLI
+        uses: cloudfoundry/cli-action@v1
+        with:
+          cf_api: ${{ secrets.CF_API }}
+          cf_username: ${{ secrets.CF_USERNAME }}
+          cf_password: ${{ secrets.CF_PASSWORD }}
+          cf_org: ${{ secrets.CF_ORG }}
+          cf_space: ${{ secrets.CF_SPACE }}
+
+      - name: Install MTA Build Tool
+        run: npm install -g mbt
+
+      - name: Build MTA archive
+        run: mbt build -t ./
+
+      - name: Deploy MTA
+        run: cf deploy *.mtar --retries 1

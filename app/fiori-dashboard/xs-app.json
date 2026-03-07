@@ -1,0 +1,18 @@
+{
+    "welcomeFile": "/index.html",
+    "authenticationMethod": "route",
+    "routes": [
+        {
+            "source": "^/api/audit/(.*)$",
+            "target": "/api/audit/$1",
+            "authenticationType": "xsuaa",
+            "destination": "srv-api"
+        },
+        {
+            "source": "^(.*)$",
+            "target": "$1",
+            "service": "html5-apps-repo-rt",
+            "authenticationType": "xsuaa"
+        }
+    ]
+}
