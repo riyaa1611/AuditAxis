@@ -16,7 +16,6 @@ default-*.json
 connection.properties
 
 # Lock files
-package-lock.json
 
 # IDE & editor
 .vscode/
