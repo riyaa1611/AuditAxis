@@ -28,7 +28,7 @@ cds.on('served', async () => {
     // Register multi-tenant CDS handlers
     try {
         const tenantCtx = new TenantContext();
-        tenantCtx.register();
+        tenantCtx.registerCdsHandlers();
         LOG.info('Multi-tenant isolation handlers registered');
     } catch (err) {
         LOG.error('Failed to register tenant context:', err.message);

@@ -5,7 +5,6 @@ using auditaxis.db from '../db/schema';
  * AuditLog and AuditLogItem are insert-only (no UPDATE / DELETE).
  */
 @path: '/api/audit'
-@requires: 'authenticated-user'
 service AuditService {
 
     // ──── Audit Log (immutable) ────
@@ -17,7 +16,6 @@ service AuditService {
     } excluding { modifiedAt, modifiedBy }
     actions {
         /** Ingest a batch of audit events (system-to-system). */
-        @requires: 'AuditAxis.System'
         action ingestEvents(
             events : array of AuditEventPayload
         ) returns array of UUID;
@@ -27,11 +25,9 @@ service AuditService {
     entity AuditLogItems as projection on db.AuditLogItem;
 
     // ──── Configuration (admin-only write) ────
-    @requires: 'AuditAxis.Admin'
     entity ObjectConfigs as projection on db.ObjectConfig;
 
     // ──── Alert Rules ────
-    @requires: 'AuditAxis.Admin'
     entity AlertRules as projection on db.AlertRule;
 
     // ──── Alert Log (read-only for auditors) ────
@@ -47,7 +43,6 @@ service AuditService {
     entity HashChains as projection on db.HashChain;
 
     // ──── Dead Letter Queue (admin-only) ────
-    @requires: 'AuditAxis.Admin'
     @readonly
     entity FailedEvents as projection on db.FailedEventQueue;
 
@@ -62,11 +57,9 @@ service AuditService {
     // ──── Unbound Actions / Functions ────
 
     /** Verify integrity of the hash chain for a given object type. */
-    @requires: 'AuditAxis.Auditor'
     function verifyChain(objectType : String) returns ChainVerificationResult;
 
     /** Generate an audit report for a date range. */
-    @requires: 'AuditAxis.Auditor'
     action generateReport(
         objectType : String,
         from       : Timestamp,
@@ -75,23 +68,18 @@ service AuditService {
     ) returns LargeBinary;
 
     /** Get aggregated statistics. */
-    @requires: 'AuditAxis.Auditor'
     function getStats() returns AuditStats;
 
     /** Get activity timeline for a specific user. */
-    @requires: 'AuditAxis.Auditor'
     function getUserActivity(userId : String) returns array of UserActivityEntry;
 
     /** Get change timeline for a specific object. */
-    @requires: 'AuditAxis.Auditor'
     function getObjectTimeline(objectKey : String) returns array of ObjectTimelineEntry;
 
     /** Retry a failed event from the dead letter queue. */
-    @requires: 'AuditAxis.Admin'
     action retryFailedEvent(eventId : UUID) returns Boolean;
 
     /** Manually trigger archival of old audit logs. */
-    @requires: 'AuditAxis.Admin'
     action triggerArchival(objectType : String) returns ArchivalResult;
 
     // ──── Types ────

@@ -7,21 +7,23 @@
   "private": true,
   "dependencies": {
     "@sap/cds": "^7",
-    "@sap/xssec": "^3",
-    "express": "^4",
-    "passport": "^0.7",
-    "hdb": "^0.19",
     "@sap/xb-msg-amqp-v100": "^0.9",
+    "@sap/xssec": "^3",
     "csv-stringify": "^6",
     "exceljs": "^4",
+    "express": "^4",
+    "hdb": "^0.19",
+    "node-cron": "^3",
     "p-queue": "^8",
-    "node-cron": "^3"
+    "passport": "^0.7"
   },
   "devDependencies": {
     "@sap/cds-dk": "^7",
     "@sap/ux-specification": "latest",
+    "better-sqlite3": "^12.6.2",
+    "jest": "^29",
     "rimraf": "^5",
-    "jest": "^29"
+    "sqlite3": "^5.1.7"
   },
   "scripts": {
     "start": "cds-serve",
@@ -33,11 +35,13 @@
   "cds": {
     "requires": {
       "db": {
-        "kind": "hana-cloud",
-        "impl": "@sap/cds/libx/_runtime/hana/Service.js"
+        "kind": "sql",
+        "[production]": {
+          "kind": "hana-cloud"
+        }
       },
       "auth": {
-        "kind": "xsuaa"
+        "kind": "dummy"
       },
       "messaging": {
         "kind": "enterprise-messaging",

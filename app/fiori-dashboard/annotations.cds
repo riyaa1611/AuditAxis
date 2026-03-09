@@ -25,7 +25,7 @@ annotate service.AuditLogs with @(
             { $Type: 'UI.DataField', Value: timestamp,        Label: 'Timestamp',
               @UI.Importance: #High },
             { $Type: 'UI.DataField', Value: changeType,       Label: 'Change Type',
-              Criticality: changeTypeCriticality },
+              Criticality: 3 },
             { $Type: 'UI.DataField', Value: transactionCode,  Label: 'Tx Code' }
         ],
 

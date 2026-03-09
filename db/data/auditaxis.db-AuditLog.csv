@@ -1,0 +1,3 @@
+auditId;objectType;objectKey;userId;userName;timestamp;changeType;transactionCode;previousHash;currentHash;tenantId
+11111111-2222-3333-4444-555555555555;PurchaseOrder;PO-998877;jsmith;John Smith;2026-03-09T10:00:00.000Z;CREATE;ME21N;0000000;a1b2c3d4;tenant-1
+22222222-3333-4444-5555-666666666666;PurchaseOrder;PO-998877;jsmith;John Smith;2026-03-09T10:05:00.000Z;UPDATE;ME22N;a1b2c3d4;b2c3d4e5;tenant-1

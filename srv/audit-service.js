@@ -45,6 +45,16 @@ module.exports = class AuditServiceHandler extends cds.ApplicationService {
         this.reject(['UPDATE', 'DELETE'], AuditLogItems);
         this.reject(['UPDATE', 'DELETE'], Alerts);
 
+        // ─── Fiori UI Virtual Fields ───
+        this.after('READ', AuditLogs, (each) => {
+            if (each.changeType) {
+                if (each.changeType === 'CREATE') each.changeTypeCriticality = 3;
+                else if (each.changeType === 'DELETE') each.changeTypeCriticality = 1;
+                else if (each.changeType === 'UPDATE') each.changeTypeCriticality = 2;
+                else each.changeTypeCriticality = 0;
+            }
+        });
+
         // ─── API Access Logging ───
         this.before('*', (req) => this._logAccess(req));
 
