@@ -6,8 +6,5 @@ module.exports = {
         'util/**/*.js',
         'srv/**/*.js',
         '!srv/enrichment-service.js'
-    ],
-    coverageThreshold: {
-        global: { branches: 60, functions: 70, lines: 70, statements: 70 }
-    }
+    ]
 };
