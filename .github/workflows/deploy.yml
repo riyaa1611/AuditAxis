@@ -51,37 +51,3 @@ jobs:
           name: mta-build
           path: gen/
           retention-days: 7
-
-  deploy:
-    name: Deploy to SAP BTP
-    needs: build
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Download build artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: mta-build
-          path: gen/
-
-      - name: Setup Cloud Foundry CLI & Login
-        run: |
-          wget -q -O - https://packages.cloudfoundry.org/debian/cli.cloudfoundry.org.key | sudo apt-key add -
-          echo "deb https://packages.cloudfoundry.org/debian stable main" | sudo tee /etc/apt/sources.list.d/cloudfoundry-cli.list
-          sudo apt-get update
-          sudo apt-get install cf8-cli
-          cf install-plugin multiapps -f
-          cf api ${{ secrets.CF_API }}
-          cf auth ${{ secrets.CF_USERNAME }} "${{ secrets.CF_PASSWORD }}"
-          cf target -o ${{ secrets.CF_ORG }} -s ${{ secrets.CF_SPACE }}
-
-      - name: Install MTA Build Tool
-        run: npm install -g mbt
-
-      - name: Build MTA archive
-        run: mbt build -t ./
-
-      - name: Deploy MTA
-        run: cf deploy *.mtar --retries 1
